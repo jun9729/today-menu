@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MealPicker — 오늘 뭐 먹지? AI 메뉴 추천</title>
+<meta name="description" content="AI가 당신의 상황, 기분, 날씨에 맞는 메뉴를 추천해드립니다. 밀키트와 식재료도 바로 구매!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #ea580c;
+  --primary-light: #fb923c;
+  --primary-dark: #c2410c;
+  --accent: #16a34a;
+  --accent-light: #22c55e;
+  --bg: #fffbf5;
+  --bg-card: #ffffff;
+  --bg-hero: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+  --text: #1c1917;
+  --text-secondary: #78716c;
+  --text-muted: #a8a29e;
+  --border: #e7e5e4;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+
+[data-theme="dark"] {
+  --primary: #fb923c;
+  --primary-light: #fdba74;
+  --primary-dark: #ea580c;
+  --accent: #22c55e;
+  --accent-light: #4ade80;
+  --bg: #1a1412;
+  --bg-card: #292220;
+  --bg-hero: linear-gradient(135deg, #292220 0%, #1a1412 50%, #2d1f18 100%);
+  --text: #fafaf9;
+  --text-secondary: #a8a29e;
+  --text-muted: #78716c;
+  --border: #3d3532;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === HEADER === */
+.site-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-size: 1.5rem; font-weight: 900;
+  color: var(--primary);
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none;
+}
+.logo-icon { font-size: 1.8rem; }
+.theme-toggle {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 50px; padding: 6px 14px;
+  cursor: pointer; font-size: 1.1rem;
+  display: flex; align-items: center; gap: 6px;
+  color: var(--text); transition: all 0.2s;
+}
+.theme-toggle:hover { border-color: var(--primary); }
+
+/* === TOP AD === */
+.top-ad {
+  text-align: center; padding: 10px 20px;
+  background: var(--bg-card);
+}
+
+/* === HERO === */
+.hero {
+  background: var(--bg-hero);
+  padding: 60px 20px 50px;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 2.5rem; font-weight: 900;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 1.1rem; color: var(--text-secondary);
+  max-width: 500px; margin: 0 auto 30px;
+}
+
+/* === INPUT AREA === */
+.input-area {
+  max-width: 640px; margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+}
+.input-area textarea {
+  width: 100%; min-height: 100px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-family: inherit; font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.input-area textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.input-area textarea::placeholder { color: var(--text-muted); }
+
+.suggest-btn {
+  width: 100%; margin-top: 14px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff; border: none;
+  border-radius: var(--radius);
+  font-family: inherit; font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.suggest-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.suggest-btn:active { transform: translateY(0); }
+.suggest-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+.suggest-btn .spinner {
+  width: 20px; height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+.suggest-btn.loading .spinner { display: block; }
+.suggest-btn.loading .btn-text { display: none; }
+.suggest-btn.loading .btn-loading-text { display: inline; }
+.suggest-btn .btn-loading-text { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* === EXAMPLES === */
+.examples {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 16px; justify-content: center;
+}
+.example-chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.example-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fff7ed;
+}
+[data-theme="dark"] .example-chip:hover { background: #2d1f18; }
+
+/* === MAIN LAYOUT === */
+.main-layout {
+  max-width: 1200px; margin: 0 auto;
+  padding: 30px 20px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+}
+.main-content { min-width: 0; }
+.sidebar { position: sticky; top: 80px; align-self: start; }
+.sidebar-ad {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.sidebar-ad-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* === MID AD === */
+.mid-ad {
+  text-align: center; padding: 16px 0;
+}
+.ad-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* === RESULTS === */
+.results-section { display: none; }
+.results-section.active { display: block; }
+.results-title {
+  font-size: 1.4rem; font-weight: 700;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.menu-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.card-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 12px;
+}
+.card-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.card-title-wrap { flex: 1; }
+.card-title {
+  font-size: 1.15rem; font-weight: 700;
+  margin-bottom: 4px;
+}
+.card-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.card-badges {
+  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.78rem; font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 50px;
+  background: #fff7ed;
+  color: var(--primary-dark);
+  border: 1px solid #fed7aa;
+}
+[data-theme="dark"] .badge { background: #2d1f18; border-color: #4a2c1a; color: var(--primary-light); }
+.badge.difficulty-easy { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+[data-theme="dark"] .badge.difficulty-easy { background: #14271a; color: #4ade80; border-color: #1a3d22; }
+
+.card-ingredients {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 14px; flex: 1;
+}
+.ingredient-tag {
+  font-size: 0.78rem;
+  padding: 2px 10px;
+  border-radius: 50px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+a.ingredient-tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.card-actions {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.buy-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--accent), #15803d);
+  color: #fff; border: none;
+  border-radius: var(--radius);
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.buy-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* === ERROR === */
+.error-msg {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  display: none;
+}
+[data-theme="dark"] .error-msg { background: #2a1515; border-color: #4a2020; }
+.error-msg.active { display: block; margin-bottom: 16px; }
+
+/* === FOOTER === */
+.site-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 30px 20px;
+  text-align: center;
+}
+.footer-inner {
+  max-width: 800px; margin: 0 auto;
+}
+.footer-logo {
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.footer-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.footer-bottom-ad { margin-top: 20px; }
+
+/* === SCROLL TOP === */
+.scroll-top {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 44px; height: 44px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s;
+  z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover { transform: translateY(-2px); }
+
+/* === LOADING SKELETON === */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.skeleton-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(90deg, var(--border) 25%, transparent 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.skeleton-line.w60 { width: 60%; }
+.skeleton-line.w80 { width: 80%; }
+.skeleton-line.w40 { width: 40%; }
+.skeleton-line.h30 { height: 30px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar { display: none; }
+  .hero h1 { font-size: 2rem; }
+}
+@media (max-width: 600px) {
+  .hero { padding: 40px 16px 35px; }
+  .hero h1 { font-size: 1.6rem; }
+  .input-area { padding: 16px; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .header-inner { padding: 10px 16px; }
+  .logo { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <span class="logo-icon">🍽️</span>
+      <span>MealPicker</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
+      <span class="theme-icon">🌙</span>
+      <span class="theme-label">다크모드</span>
+    </button>
+  </div>
+</header>
+
+<!-- TOP AD -->
+<div class="top-ad">
+  <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>🍳 오늘 뭐 먹지?</h1>
+  <p>상황, 기분, 날씨를 알려주세요. AI가 딱 맞는 메뉴를 추천해드립니다!</p>
+  <div class="input-area">
+    <textarea id="userInput" placeholder="예: 비 오는 날인데 따뜻한 국물 요리 추천해줘&#10;혼밥하기 좋은 간단한 메뉴 알려줘&#10;아이 간식으로 좋은 메뉴 추천해줘"></textarea>
+    <button class="suggest-btn" id="suggestBtn" onclick="getRecommendation()">
+      <span class="spinner"></span>
+      <span class="btn-text">✨ AI 메뉴 추천받기</span>
+      <span class="btn-loading-text">AI가 메뉴를 고르고 있어요...</span>
+    </button>
+    <div class="examples">
+      <span class="example-chip" onclick="setExample(this)">🌧️ 비 오는 날 국물요리</span>
+      <span class="example-chip" onclick="setExample(this)">🥗 다이어트 저칼로리 식단</span>
+      <span class="example-chip" onclick="setExample(this)">⏱️ 30분 안에 만들 수 있는 저녁</span>
+      <span class="example-chip" onclick="setExample(this)">👶 아이가 좋아하는 간식</span>
+      <span class="example-chip" onclick="setExample(this)">🍺 술안주 추천</span>
+      <span class="example-chip" onclick="setExample(this)">🏠 자취생 초간단 요리</span>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+  <div class="main-content">
+    <!-- ERROR -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- LOADING -->
+    <div id="loadingArea" style="display:none;">
+      <div class="results-title">⏳ AI가 추천 메뉴를 준비하고 있어요...</div>
+      <div class="skeleton-grid">
+        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
+        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
+        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <section class="results-section" id="resultsSection">
+      <div class="results-title">🎯 AI 추천 메뉴</div>
+      <div class="menu-grid" id="menuGrid"></div>
+
+      <!-- MID AD -->
+      <div class="mid-ad">
+        <div class="ad-label">AD</div>
+        <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+      </div>
+    </section>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-ad">
+      <div class="sidebar-ad-label">AD</div>
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url"></iframe>
+    </div>
+    <div class="sidebar-ad">
+      <div class="sidebar-ad-label">AD</div>
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url"></iframe>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">🍽️ MealPicker — AI 메뉴 추천</div>
+    <p class="footer-desc">
+      이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+    </p>
+    <div class="footer-bottom-ad">
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+    </div>
+  </div>
+</footer>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
+
+<script>
+// === API KEY ===
+const _EK = 'LawFinder2026!@#';
+function _d(e){const d=atob(e);let r='';for(let i=0;i<d.length;i++)r+=String.fromCharCode(d.charCodeAt(i)^_EK.charCodeAt(i%_EK.length));return r;}
+const _KEYS = { ai: _d('PwpaNhsBDkgIRFNFQEoVSjgRQiIQXwsgFHADfgJVdFV+KS4ALTQrLh1XAGsCVCtqDlIhBDMEKhEwYXt4UxkFUQALPwIOLzs3RlRRU05pFmYrCyN1KwIGDjR4Y2VnGBBIeQtCBw4HISQqY3FCWUh2YhZYIApRBBcwPmpyWFtoLnwWVCI2LwFRCTNDdntVdHkVHBEoMFpYJlc3VkJjUE83Ty4xAAc=') };
+
+document.addEventListener('DOMContentLoaded', function() {
+  localStorage.setItem('openaiKey', _KEYS.ai);
+  initTheme();
+});
+
+// === THEME ===
+function initTheme() {
+  const saved = localStorage.getItem('mealpicker-theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    updateThemeUI(true);
+  }
+}
+
+document.getElementById('themeToggle').addEventListener('click', function() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('mealpicker-theme', 'light');
+    updateThemeUI(false);
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('mealpicker-theme', 'dark');
+    updateThemeUI(true);
+  }
+});
+
+function updateThemeUI(isDark) {
+  document.querySelector('.theme-icon').textContent = isDark ? '☀️' : '🌙';
+  document.querySelector('.theme-label').textContent = isDark ? '라이트모드' : '다크모드';
+}
+
+// === SCROLL TOP ===
+window.addEventListener('scroll', function() {
+  document.getElementById('scrollTopBtn').classList.toggle('visible', window.scrollY > 400);
+});
+
+// === EXAMPLES ===
+function setExample(el) {
+  const text = el.textContent.replace(/^[^\s]+\s/, '');
+  document.getElementById('userInput').value = text;
+  document.getElementById('userInput').focus();
+}
+
+// === COUPANG LINK ===
+function coupangLink(query) {
+  return 'https://www.coupang.com/np/search?q=' + encodeURIComponent(query) + '&channel=user&src=1032001&spec=10305010&addtag=400&ctag=mealpicker&lptag=AF7220529';
+}
+
+// === CLEAN JSON ===
+function cleanJson(text) {
+  let s = text.trim();
+  // Remove markdown code block
+  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  s = s.trim();
+  // Try to extract JSON array
+  const arrMatch = s.match(/\[[\s\S]*\]/);
+  if (arrMatch) s = arrMatch[0];
+  return JSON.parse(s);
+}
+
+// === API CALL ===
+async function getRecommendation() {
+  const input = document.getElementById('userInput').value.trim();
+  if (!input) {
+    showError('상황이나 기분을 입력해주세요! 예: "비 오는 날 따뜻한 국물요리 추천해줘"');
+    return;
+  }
+
+  const btn = document.getElementById('suggestBtn');
+  const loading = document.getElementById('loadingArea');
+  const results = document.getElementById('resultsSection');
+  const errorEl = document.getElementById('errorMsg');
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  loading.style.display = 'block';
+  results.classList.remove('active');
+  errorEl.classList.remove('active');
+
+  const apiKey = localStorage.getItem('openaiKey');
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        temperature: 0.8,
+        messages: [
+          {
+            role: 'system',
+            content: '당신은 메뉴 추천 전문가입니다. 사용자의 상황, 기분, 날씨에 맞는 메뉴를 5~6개 추천해주세요. 반드시 아래 JSON 배열 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요.\n[{"menu":"메뉴명","description":"한줄설명","emoji":"이모지","difficulty":"쉬움/보통/어려움","time":"조리시간","ingredients":["재료1","재료2"],"searchQuery":"쿠팡 밀키트 검색어"}]'
+          },
+          {
+            role: 'user',
+            content: input
+          }
+        ]
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || '요청에 실패했습니다. (HTTP ' + res.status + ')');
+    }
+
+    const data = await res.json();
+    const content = data.choices[0].message.content;
+    const menus = cleanJson(content);
+
+    renderMenus(menus);
+  } catch (err) {
+    showError('추천을 가져오는 중 오류가 발생했어요: ' + err.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('active');
+}
+
+// === RENDER ===
+function renderMenus(menus) {
+  const grid = document.getElementById('menuGrid');
+  const section = document.getElementById('resultsSection');
+
+  grid.innerHTML = menus.map(function(item) {
+    const diffClass = item.difficulty === '쉬움' ? 'difficulty-easy' : '';
+    const ingredientTags = (item.ingredients || []).map(function(ing) {
+      return '<a class="ingredient-tag" href="' + coupangLink(ing) + '" target="_blank" rel="noopener" title="' + ing + ' 구매하기">' + ing + '</a>';
+    }).join('');
+
+    return '<div class="menu-card">' +
+      '<div class="card-header">' +
+        '<div class="card-emoji">' + (item.emoji || '🍽️') + '</div>' +
+        '<div class="card-title-wrap">' +
+          '<div class="card-title">' + escapeHtml(item.menu) + '</div>' +
+          '<div class="card-desc">' + escapeHtml(item.description) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-badges">' +
+        '<span class="badge ' + diffClass + '">📊 ' + escapeHtml(item.difficulty) + '</span>' +
+        '<span class="badge">⏱️ ' + escapeHtml(item.time) + '</span>' +
+      '</div>' +
+      '<div class="card-ingredients">' + ingredientTags + '</div>' +
+      '<div class="card-actions">' +
+        '<a class="buy-btn" href="' + coupangLink(item.searchQuery) + '" target="_blank" rel="noopener">' +
+          '🛒 밀키트 구매하기' +
+        '</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  section.classList.add('active');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Enter key
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    getRecommendation();
+  }
+});
+</script>
+</body>
+</html>
