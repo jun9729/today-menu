@@ -873,6 +873,41 @@ a.ingredient-tag:hover {
   clip: rect(0,0,0,0);
   border: 0;
 }
+
+/* ==================== Button Loading Spinner ==================== */
+.btn-loading{pointer-events:none;opacity:0.8;}
+.btn-loading::after{content:'';display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-left:6px;vertical-align:middle;}
+
+/* ==================== Heart / Like Button ==================== */
+.heart-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:none;border:1.5px solid var(--border);
+  border-radius:50px;padding:7px 14px;font-size:0.82rem;font-weight:600;
+  color:var(--text-secondary);cursor:pointer;transition:all 0.2s;
+  font-family:inherit;margin-top:8px;
+}
+.heart-btn:hover{border-color:#ef4444;color:#ef4444;}
+.heart-btn.liked{border-color:#ef4444;color:#ef4444;background:#fef2f2;}
+[data-theme="dark"] .heart-btn.liked{background:#2a1515;}
+
+/* ==================== Retry Button ==================== */
+.retry-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--bg-card);border:1.5px solid var(--border);
+  border-radius:50px;padding:10px 22px;font-size:0.92rem;font-weight:600;
+  color:var(--text-secondary);cursor:pointer;transition:all 0.2s;
+  font-family:inherit;margin-top:16px;
+}
+.retry-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--chip-hover-bg);transform:translateY(-2px);}
+
+/* ==================== Toast ==================== */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1c1917;color:#fff;padding:14px 24px;border-radius:var(--radius);
+  font-size:0.9rem;z-index:10000;box-shadow:var(--shadow-lg);
+  transition:transform 0.3s ease,opacity 0.3s ease;opacity:0;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
 </style>
 </head>
 <body>
@@ -971,7 +1006,9 @@ a.ingredient-tag:hover {
     <section class="results-section" id="resultsSection">
       <div class="results-title" id="resultsTitle">🎯 AI 추천 메뉴</div>
       <div class="menu-grid" id="menuGrid"></div>
-
+      <div style="text-align:center;">
+        <button class="retry-btn" id="retryBtn" onclick="getRecommendation()" style="display:none;">🔄 다시 추천받기</button>
+      </div>
     </section>
   </div>
 
@@ -1371,11 +1408,15 @@ function renderMenus(menus) {
         '<a class="buy-btn" href="' + coupangLink(item.searchQuery || item.menu + ' 밀키트') + '" target="_blank" rel="noopener noreferrer">' +
           '🔍 최저가 보기' +
         '</a>' +
+        '<button class="heart-btn' + (isMenuLiked(item.menu) ? ' liked' : '') + '" onclick="toggleLikeMenu(this,\'' + escapeHtml(item.menu).replace(/'/g,'\\\'') + '\')">' +
+          (isMenuLiked(item.menu) ? '❤️' : '🤍') + ' 이 메뉴 마음에 들어요' +
+        '</button>' +
       '</div>' +
     '</article>';
   }).join('');
 
   section.classList.add('active');
+  document.getElementById('retryBtn').style.display = 'inline-flex';
   section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1402,6 +1443,43 @@ document.getElementById('userInput').addEventListener('keydown', function(e) {
     getRecommendation();
   }
 });
+
+// ==================== TOAST ====================
+var toastEl = document.createElement('div');
+toastEl.className = 'toast';
+document.body.appendChild(toastEl);
+var toastTimer = null;
+function showToast(msg, duration) {
+  duration = duration || 2500;
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, duration);
+}
+
+// ==================== HEART / LIKE ====================
+function getLikedMenus() {
+  try { return JSON.parse(localStorage.getItem('mealpicker-likes') || '[]'); } catch(e) { return []; }
+}
+function isMenuLiked(name) {
+  return getLikedMenus().indexOf(name) !== -1;
+}
+function toggleLikeMenu(btn, name) {
+  var likes = getLikedMenus();
+  var idx = likes.indexOf(name);
+  if (idx === -1) {
+    likes.push(name);
+    btn.classList.add('liked');
+    btn.innerHTML = '❤️ 이 메뉴 마음에 들어요';
+    showToast('❤️ "' + name + '" 좋아요! 저장했습니다.');
+  } else {
+    likes.splice(idx, 1);
+    btn.classList.remove('liked');
+    btn.innerHTML = '🤍 이 메뉴 마음에 들어요';
+    showToast('좋아요를 취소했습니다.');
+  }
+  localStorage.setItem('mealpicker-likes', JSON.stringify(likes));
+}
 </script>
 </body>
 </html>
