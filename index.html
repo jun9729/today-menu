@@ -4,10 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MealPicker — 오늘 뭐 먹지? AI 메뉴 추천</title>
-<meta name="description" content="AI가 당신의 상황, 기분, 날씨에 맞는 메뉴를 추천해드립니다. 밀키트와 식재료도 바로 구매!">
+<meta name="description" content="오늘 뭐 먹지? AI가 상황, 기분, 날씨에 맞는 메뉴를 추천합니다. 밀키트도 바로 구매!">
+<meta name="keywords" content="오늘뭐먹지,메뉴추천,AI메뉴,밀키트,식단추천">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MealPicker — 오늘 뭐 먹지? AI 메뉴 추천">
+<meta property="og:description" content="오늘 뭐 먹지? AI가 상황, 기분, 날씨에 맞는 메뉴를 추천합니다. 밀키트도 바로 구매!">
+<meta property="og:url" content="https://mealpicker.kr">
+<meta property="og:site_name" content="MealPicker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MealPicker — 오늘 뭐 먹지? AI 메뉴 추천">
+<meta name="twitter:description" content="AI가 상황, 기분, 날씨에 맞는 메뉴를 추천합니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mealpicker.kr">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
+/* ==================== CSS VARIABLES ==================== */
 :root {
   --primary: #ea580c;
   --primary-light: #fb923c;
@@ -17,15 +30,33 @@
   --bg: #fffbf5;
   --bg-card: #ffffff;
   --bg-hero: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+  --bg-input: #ffffff;
   --text: #1c1917;
   --text-secondary: #78716c;
   --text-muted: #a8a29e;
   --border: #e7e5e4;
+  --border-hover: #d6d3d1;
   --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.1), 0 8px 10px rgba(0,0,0,0.04);
   --radius: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
+  --chip-hover-bg: #fff7ed;
+  --badge-bg: #fff7ed;
+  --badge-color: var(--primary-dark);
+  --badge-border: #fed7aa;
+  --badge-easy-bg: #f0fdf4;
+  --badge-easy-color: #15803d;
+  --badge-easy-border: #bbf7d0;
+  --filter-active-bg: var(--primary);
+  --filter-active-text: #ffffff;
+  --history-bg: #fafaf9;
+  --faq-bg: #fafaf9;
+  --faq-border: #e7e5e4;
+  --counter-bg: #fff7ed;
+  --counter-color: var(--primary-dark);
 }
 
 [data-theme="dark"] {
@@ -37,113 +68,215 @@
   --bg: #1a1412;
   --bg-card: #292220;
   --bg-hero: linear-gradient(135deg, #292220 0%, #1a1412 50%, #2d1f18 100%);
+  --bg-input: #1a1412;
   --text: #fafaf9;
   --text-secondary: #a8a29e;
   --text-muted: #78716c;
   --border: #3d3532;
+  --border-hover: #57504b;
   --shadow: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.5);
+  --chip-hover-bg: #2d1f18;
+  --badge-bg: #2d1f18;
+  --badge-color: var(--primary-light);
+  --badge-border: #4a2c1a;
+  --badge-easy-bg: #14271a;
+  --badge-easy-color: #4ade80;
+  --badge-easy-border: #1a3d22;
+  --filter-active-bg: var(--primary);
+  --filter-active-text: #1a1412;
+  --history-bg: #221c1a;
+  --faq-bg: #221c1a;
+  --faq-border: #3d3532;
+  --counter-bg: #2d1f18;
+  --counter-color: var(--primary-light);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ==================== RESET ==================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
   transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
 }
 
-/* === HEADER === */
+/* ==================== HEADER (sticky nav) ==================== */
 .site-header {
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .header-inner {
-  max-width: 1200px; margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 12px 20px;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .logo {
-  font-size: 1.5rem; font-weight: 900;
+  font-size: 1.5rem;
+  font-weight: 900;
   color: var(--primary);
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
+  transition: opacity 0.2s;
 }
+.logo:hover { opacity: 0.85; }
 .logo-icon { font-size: 1.8rem; }
-.theme-toggle {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 50px; padding: 6px 14px;
-  cursor: pointer; font-size: 1.1rem;
-  display: flex; align-items: center; gap: 6px;
-  color: var(--text); transition: all 0.2s;
+.header-right { display: flex; align-items: center; gap: 12px; }
+.search-counter {
+  background: var(--counter-bg);
+  color: var(--counter-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 50px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s;
 }
-.theme-toggle:hover { border-color: var(--primary); }
+.search-counter.visible { display: inline-flex; }
+.theme-toggle {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  transition: all 0.2s;
+}
+.theme-toggle:hover { border-color: var(--primary); background: var(--chip-hover-bg); }
 
-/* === TOP AD === */
+/* ==================== TOP AD ==================== */
 .top-ad {
-  text-align: center; padding: 10px 20px;
+  text-align: center;
+  padding: 10px 20px;
   background: var(--bg-card);
 }
 
-/* === HERO === */
+/* ==================== HERO ==================== */
 .hero {
   background: var(--bg-hero);
   padding: 60px 20px 50px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '🍕 🍜 🥗 🍰 🍣 🥘';
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.6rem;
+  letter-spacing: 18px;
+  opacity: 0.18;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.hero::after {
+  content: '🌮 🍲 🥟 🍔 🍱 🧁';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+  letter-spacing: 16px;
+  opacity: 0.12;
+  pointer-events: none;
+  white-space: nowrap;
 }
 .hero h1 {
-  font-size: 2.5rem; font-weight: 900;
+  font-size: 2.8rem;
+  font-weight: 900;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   background-clip: text;
+  position: relative;
+  z-index: 1;
 }
-.hero p {
-  font-size: 1.1rem; color: var(--text-secondary);
-  max-width: 500px; margin: 0 auto 30px;
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0 auto 32px;
+  position: relative;
+  z-index: 1;
 }
 
-/* === INPUT AREA === */
-.input-area {
-  max-width: 640px; margin: 0 auto;
+/* ==================== SEARCH CARD ==================== */
+.search-card {
+  max-width: 660px;
+  margin: 0 auto;
   background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 24px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 28px;
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--border);
 }
-.input-area textarea {
-  width: 100%; min-height: 100px;
+.search-card textarea {
+  width: 100%;
+  min-height: 110px;
   border: 2px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px;
-  font-family: inherit; font-size: 1rem;
+  font-family: inherit;
+  font-size: 1rem;
   color: var(--text);
-  background: var(--bg);
+  background: var(--bg-input);
   resize: vertical;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.input-area textarea:focus {
+.search-card textarea:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(234,88,12,0.12);
 }
-.input-area textarea::placeholder { color: var(--text-muted); }
+.search-card textarea::placeholder { color: var(--text-muted); }
 
 .suggest-btn {
-  width: 100%; margin-top: 14px;
-  padding: 14px 24px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px 24px;
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff; border: none;
+  color: #fff;
+  border: none;
   border-radius: var(--radius);
-  font-family: inherit; font-size: 1.05rem; font-weight: 700;
-  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-.suggest-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.suggest-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 .suggest-btn:active { transform: translateY(0); }
 .suggest-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 .suggest-btn .spinner {
@@ -161,10 +294,13 @@ body {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* === EXAMPLES === */
+/* ==================== EXAMPLE CHIPS ==================== */
 .examples {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  margin-top: 16px; justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: center;
 }
 .example-chip {
   background: var(--bg);
@@ -175,24 +311,124 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
+  user-select: none;
 }
 .example-chip:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background: #fff7ed;
+  background: var(--chip-hover-bg);
+  transform: translateY(-1px);
 }
-[data-theme="dark"] .example-chip:hover { background: #2d1f18; }
 
-/* === MAIN LAYOUT === */
+/* ==================== QUICK FILTER BUTTONS ==================== */
+.quick-filters {
+  max-width: 660px;
+  margin: 18px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+.filter-btn {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--chip-hover-bg);
+  transform: translateY(-1px);
+}
+.filter-btn:active, .filter-btn.active {
+  background: var(--filter-active-bg);
+  color: var(--filter-active-text);
+  border-color: var(--filter-active-bg);
+}
+
+/* ==================== RECENT HISTORY ==================== */
+.history-section {
+  max-width: 660px;
+  margin: 16px auto 0;
+  position: relative;
+  z-index: 1;
+}
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.history-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.history-clear {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+.history-clear:hover { color: var(--primary); }
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.history-item {
+  background: var(--history-bg);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.history-item:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ==================== MAIN LAYOUT (2-column) ==================== */
 .main-layout {
-  max-width: 1200px; margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 30px 20px;
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 24px;
 }
 .main-content { min-width: 0; }
-.sidebar { position: sticky; top: 80px; align-self: start; }
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
 .sidebar-ad {
   background: var(--bg-card);
   border-radius: var(--radius);
@@ -200,32 +436,40 @@ body {
   box-shadow: var(--shadow);
   margin-bottom: 16px;
   text-align: center;
+  border: 1px solid var(--border);
 }
-.sidebar-ad-label {
+.sidebar-ad-label,
+.ad-label {
   font-size: 0.7rem;
   color: var(--text-muted);
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 500;
 }
 
-/* === MID AD === */
+/* ==================== MID AD ==================== */
 .mid-ad {
-  text-align: center; padding: 16px 0;
-}
-.ad-label {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  text-align: center;
+  padding: 20px 0;
 }
 
-/* === RESULTS === */
+/* ==================== RESULTS ==================== */
 .results-section { display: none; }
-.results-section.active { display: block; }
+.results-section.active { display: block; animation: fadeInUp 0.5s ease-out; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .results-title {
-  font-size: 1.4rem; font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 700;
   margin-bottom: 20px;
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .menu-grid {
@@ -238,28 +482,46 @@ body {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 20px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 22px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   border: 1px solid var(--border);
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: cardFadeIn 0.4s ease-out forwards;
 }
+.menu-card:nth-child(1) { animation-delay: 0.05s; }
+.menu-card:nth-child(2) { animation-delay: 0.1s; }
+.menu-card:nth-child(3) { animation-delay: 0.15s; }
+.menu-card:nth-child(4) { animation-delay: 0.2s; }
+.menu-card:nth-child(5) { animation-delay: 0.25s; }
+.menu-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .menu-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
 }
 .card-header {
-  display: flex; align-items: flex-start; gap: 12px;
-  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 .card-emoji {
-  font-size: 2.5rem;
+  font-size: 3rem;
   line-height: 1;
   flex-shrink: 0;
 }
 .card-title-wrap { flex: 1; }
 .card-title {
-  font-size: 1.15rem; font-weight: 700;
-  margin-bottom: 4px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 .card-desc {
   font-size: 0.88rem;
@@ -268,59 +530,89 @@ body {
 }
 
 .card-badges {
-  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 0.78rem; font-weight: 500;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 11px;
   border-radius: 50px;
-  background: #fff7ed;
-  color: var(--primary-dark);
-  border: 1px solid #fed7aa;
+  background: var(--badge-bg);
+  color: var(--badge-color);
+  border: 1px solid var(--badge-border);
 }
-[data-theme="dark"] .badge { background: #2d1f18; border-color: #4a2c1a; color: var(--primary-light); }
-.badge.difficulty-easy { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
-[data-theme="dark"] .badge.difficulty-easy { background: #14271a; color: #4ade80; border-color: #1a3d22; }
+.badge.difficulty-easy {
+  background: var(--badge-easy-bg);
+  color: var(--badge-easy-color);
+  border-color: var(--badge-easy-border);
+}
+.badge.difficulty-hard {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+[data-theme="dark"] .badge.difficulty-hard {
+  background: #2a1515;
+  color: #f87171;
+  border-color: #4a2020;
+}
 
 .card-ingredients {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  margin-bottom: 14px; flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex: 1;
 }
 .ingredient-tag {
   font-size: 0.78rem;
-  padding: 2px 10px;
+  padding: 3px 10px;
   border-radius: 50px;
   background: var(--bg);
   color: var(--text-secondary);
   border: 1px solid var(--border);
   text-decoration: none;
   transition: all 0.2s;
+  cursor: pointer;
 }
 a.ingredient-tag:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--badge-easy-bg);
 }
 
 .card-actions {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
 }
 .buy-btn {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
-  padding: 10px 16px;
+  padding: 11px 16px;
   background: linear-gradient(135deg, var(--accent), #15803d);
-  color: #fff; border: none;
+  color: #fff;
+  border: none;
   border-radius: var(--radius);
-  font-family: inherit; font-size: 0.9rem; font-weight: 600;
-  cursor: pointer; text-decoration: none;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.buy-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.buy-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-/* === ERROR === */
+/* ==================== ERROR ==================== */
 .error-msg {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -333,46 +625,7 @@ a.ingredient-tag:hover {
 [data-theme="dark"] .error-msg { background: #2a1515; border-color: #4a2020; }
 .error-msg.active { display: block; margin-bottom: 16px; }
 
-/* === FOOTER === */
-.site-footer {
-  background: var(--bg-card);
-  border-top: 1px solid var(--border);
-  padding: 30px 20px;
-  text-align: center;
-}
-.footer-inner {
-  max-width: 800px; margin: 0 auto;
-}
-.footer-logo {
-  font-size: 1.2rem; font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 8px;
-}
-.footer-desc {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-.footer-bottom-ad { margin-top: 20px; }
-
-/* === SCROLL TOP === */
-.scroll-top {
-  position: fixed; bottom: 24px; right: 24px;
-  width: 44px; height: 44px;
-  background: var(--primary); color: #fff;
-  border: none; border-radius: 50%;
-  font-size: 1.3rem;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  opacity: 0; visibility: hidden;
-  transition: all 0.3s;
-  z-index: 50;
-  display: flex; align-items: center; justify-content: center;
-}
-.scroll-top.visible { opacity: 1; visibility: visible; }
-.scroll-top:hover { transform: translateY(-2px); }
-
-/* === LOADING SKELETON === */
+/* ==================== SKELETON LOADING ==================== */
 .skeleton-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -381,8 +634,22 @@ a.ingredient-tag:hover {
 .skeleton-card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 22px;
   border: 1px solid var(--border);
+}
+.skeleton-header {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.skeleton-emoji {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--border) 25%, transparent 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  flex-shrink: 0;
 }
 .skeleton-line {
   height: 14px;
@@ -395,24 +662,172 @@ a.ingredient-tag:hover {
 .skeleton-line.w60 { width: 60%; }
 .skeleton-line.w80 { width: 80%; }
 .skeleton-line.w40 { width: 40%; }
+.skeleton-line.w100 { width: 100%; }
+.skeleton-line.h20 { height: 20px; }
 .skeleton-line.h30 { height: 30px; }
+.skeleton-line.h40 { height: 40px; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 
-/* === RESPONSIVE === */
+/* ==================== FAQ ACCORDION ==================== */
+.faq-section {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.faq-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--faq-border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.faq-item:hover { box-shadow: var(--shadow); }
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  transition: color 0.2s;
+}
+.faq-question:hover { color: var(--primary); }
+.faq-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.faq-item.open .faq-answer {
+  max-height: 200px;
+  padding: 0 20px 16px;
+}
+
+/* ==================== FOOTER (sticky) ==================== */
+.site-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 32px 20px;
+  text-align: center;
+  margin-top: 20px;
+}
+.footer-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.footer-logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.footer-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
+.footer-notice {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.footer-bottom-ad { margin-top: 20px; }
+
+/* ==================== SCROLL TO TOP ==================== */
+.scroll-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl); }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr 260px;
+  }
+}
 @media (max-width: 900px) {
   .main-layout {
     grid-template-columns: 1fr;
   }
   .sidebar { display: none; }
-  .hero h1 { font-size: 2rem; }
+  .hero h1 { font-size: 2.2rem; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
   .hero { padding: 40px 16px 35px; }
-  .hero h1 { font-size: 1.6rem; }
-  .input-area { padding: 16px; }
+  .hero h1 { font-size: 1.7rem; }
+  .hero::before, .hero::after { font-size: 1.1rem; letter-spacing: 10px; }
+  .search-card { padding: 18px; margin: 0 -4px; border-radius: var(--radius-lg); }
   .menu-grid { grid-template-columns: 1fr; }
   .header-inner { padding: 10px 16px; }
   .logo { font-size: 1.25rem; }
+  .search-counter { display: none !important; }
+  .quick-filters { gap: 6px; }
+  .filter-btn { padding: 6px 14px; font-size: 0.82rem; }
+  .faq-section { margin: 24px auto; }
+}
+
+/* ==================== UTILS ==================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
 }
 </style>
 </head>
@@ -421,28 +836,33 @@ a.ingredient-tag:hover {
 <!-- HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <a href="#" class="logo">
+    <a href="/" class="logo" aria-label="MealPicker 홈">
       <span class="logo-icon">🍽️</span>
       <span>MealPicker</span>
     </a>
-    <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
-      <span class="theme-icon">🌙</span>
-      <span class="theme-label">다크모드</span>
-    </button>
+    <div class="header-right">
+      <span class="search-counter" id="searchCounter" title="총 검색 횟수">🔥 <span id="searchCount">0</span>회 추천</span>
+      <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-label">다크모드</span>
+      </button>
+    </div>
   </div>
 </header>
 
 <!-- TOP AD -->
 <div class="top-ad">
-  <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+  <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" style="max-width:728px;margin:0 auto;display:block;" title="쿠팡 파트너스 광고"></iframe>
 </div>
 
 <!-- HERO -->
 <section class="hero">
   <h1>🍳 오늘 뭐 먹지?</h1>
-  <p>상황, 기분, 날씨를 알려주세요. AI가 딱 맞는 메뉴를 추천해드립니다!</p>
-  <div class="input-area">
-    <textarea id="userInput" placeholder="예: 비 오는 날인데 따뜻한 국물 요리 추천해줘&#10;혼밥하기 좋은 간단한 메뉴 알려줘&#10;아이 간식으로 좋은 메뉴 추천해줘"></textarea>
+  <p class="hero-subtitle">상황, 기분, 날씨를 알려주세요. AI가 딱 맞는 메뉴를 추천해드립니다!</p>
+
+  <!-- SEARCH CARD -->
+  <div class="search-card">
+    <textarea id="userInput" placeholder="예: 비 오는 날인데 따뜻한 국물 요리 추천해줘&#10;혼밥하기 좋은 간단한 메뉴 알려줘&#10;아이 간식으로 좋은 메뉴 추천해줘" aria-label="메뉴 추천 요청 입력"></textarea>
     <button class="suggest-btn" id="suggestBtn" onclick="getRecommendation()">
       <span class="spinner"></span>
       <span class="btn-text">✨ AI 메뉴 추천받기</span>
@@ -457,6 +877,25 @@ a.ingredient-tag:hover {
       <span class="example-chip" onclick="setExample(this)">🏠 자취생 초간단 요리</span>
     </div>
   </div>
+
+  <!-- QUICK FILTER BUTTONS -->
+  <div class="quick-filters">
+    <button class="filter-btn" onclick="quickFilter(this, '한식')" data-category="한식">🇰🇷 한식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '중식')" data-category="중식">🥡 중식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '양식')" data-category="양식">🍝 양식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '일식')" data-category="일식">🍣 일식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '디저트')" data-category="디저트">🍰 디저트</button>
+    <button class="filter-btn" onclick="quickFilter(this, '다이어트')" data-category="다이어트">🥦 다이어트</button>
+  </div>
+
+  <!-- RECENT HISTORY -->
+  <div class="history-section" id="historySection" style="display:none;">
+    <div class="history-header">
+      <span class="history-title">🕐 최근 검색</span>
+      <button class="history-clear" onclick="clearHistory()">전체 삭제</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
 </section>
 
 <!-- MAIN LAYOUT -->
@@ -465,41 +904,95 @@ a.ingredient-tag:hover {
     <!-- ERROR -->
     <div class="error-msg" id="errorMsg"></div>
 
-    <!-- LOADING -->
+    <!-- LOADING SKELETON -->
     <div id="loadingArea" style="display:none;">
       <div class="results-title">⏳ AI가 추천 메뉴를 준비하고 있어요...</div>
       <div class="skeleton-grid">
-        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
-        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
-        <div class="skeleton-card"><div class="skeleton-line h30 w60"></div><div class="skeleton-line w80"></div><div class="skeleton-line w40"></div><div class="skeleton-line"></div></div>
+        <div class="skeleton-card">
+          <div class="skeleton-header"><div class="skeleton-emoji"></div><div style="flex:1"><div class="skeleton-line h20 w60"></div><div class="skeleton-line w80"></div></div></div>
+          <div class="skeleton-line w40"></div><div class="skeleton-line w100 h40"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-header"><div class="skeleton-emoji"></div><div style="flex:1"><div class="skeleton-line h20 w60"></div><div class="skeleton-line w80"></div></div></div>
+          <div class="skeleton-line w40"></div><div class="skeleton-line w100 h40"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-header"><div class="skeleton-emoji"></div><div style="flex:1"><div class="skeleton-line h20 w60"></div><div class="skeleton-line w80"></div></div></div>
+          <div class="skeleton-line w40"></div><div class="skeleton-line w100 h40"></div>
+        </div>
       </div>
     </div>
 
     <!-- RESULTS -->
     <section class="results-section" id="resultsSection">
-      <div class="results-title">🎯 AI 추천 메뉴</div>
+      <div class="results-title" id="resultsTitle">🎯 AI 추천 메뉴</div>
       <div class="menu-grid" id="menuGrid"></div>
 
       <!-- MID AD -->
       <div class="mid-ad">
         <div class="ad-label">AD</div>
-        <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+        <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" style="max-width:728px;margin:0 auto;display:block;" title="쿠팡 파트너스 광고"></iframe>
       </div>
     </section>
   </div>
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" aria-label="광고">
     <div class="sidebar-ad">
       <div class="sidebar-ad-label">AD</div>
-      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url"></iframe>
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" title="쿠팡 파트너스 광고"></iframe>
     </div>
     <div class="sidebar-ad">
       <div class="sidebar-ad-label">AD</div>
-      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url"></iframe>
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" title="쿠팡 파트너스 광고"></iframe>
     </div>
   </aside>
 </div>
+
+<!-- FAQ SECTION -->
+<section class="faq-section" aria-label="자주 묻는 질문">
+  <div class="faq-title">❓ 자주 묻는 질문</div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      MealPicker는 어떻게 메뉴를 추천하나요?
+      <span class="faq-arrow">▼</span>
+    </button>
+    <div class="faq-answer">OpenAI GPT 기반의 AI가 사용자가 입력한 상황, 기분, 날씨 등의 정보를 분석하여 최적의 메뉴를 추천합니다. 각 메뉴에는 난이도, 조리 시간, 필요한 재료 정보가 함께 제공됩니다.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      밀키트 구매 버튼은 무엇인가요?
+      <span class="faq-arrow">▼</span>
+    </button>
+    <div class="faq-answer">추천된 메뉴와 관련된 밀키트나 식재료를 쿠팡에서 바로 검색하고 구매할 수 있는 링크입니다. 쿠팡 파트너스를 통해 제공되며, 구매 시 소정의 수수료를 받을 수 있습니다.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      추천이 마음에 들지 않으면 어떻게 하나요?
+      <span class="faq-arrow">▼</span>
+    </button>
+    <div class="faq-answer">다시 추천받기 버튼을 누르거나, 좀 더 구체적으로 상황을 설명해주세요. 예를 들어 "혼자 먹는 저녁, 매운 것 빼고"처럼 조건을 추가하면 더 정확한 추천을 받을 수 있습니다.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      무료로 사용할 수 있나요?
+      <span class="faq-arrow">▼</span>
+    </button>
+    <div class="faq-answer">네, MealPicker는 완전 무료로 사용할 수 있습니다. 회원가입 없이 바로 메뉴 추천을 받아보세요.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      빠른 필터 버튼은 어떻게 사용하나요?
+      <span class="faq-arrow">▼</span>
+    </button>
+    <div class="faq-answer">한식, 중식, 양식, 일식, 디저트, 다이어트 버튼 중 원하는 카테고리를 클릭하면 해당 카테고리에 맞는 메뉴를 AI가 바로 추천해줍니다.</div>
+  </div>
+</section>
 
 <!-- FOOTER -->
 <footer class="site-footer">
@@ -508,29 +1001,33 @@ a.ingredient-tag:hover {
     <p class="footer-desc">
       이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
     </p>
+    <p class="footer-notice">&copy; 2026 MealPicker. AI 기반 메뉴 추천 서비스.</p>
     <div class="footer-bottom-ad">
-      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" style="max-width:728px;margin:0 auto;display:block;"></iframe>
+      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" style="max-width:728px;margin:0 auto;display:block;" title="쿠팡 파트너스 광고"></iframe>
     </div>
   </div>
 </footer>
 
 <!-- SCROLL TO TOP -->
-<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로 이동">↑</button>
 
 <script>
-// === API KEY ===
+// ==================== API KEY (obfuscated) ====================
 const _EK = 'LawFinder2026!@#';
 function _d(e){const d=atob(e);let r='';for(let i=0;i<d.length;i++)r+=String.fromCharCode(d.charCodeAt(i)^_EK.charCodeAt(i%_EK.length));return r;}
 const _KEYS = { ai: _d('PwpaNhsBDkgIRFNFQEoVSjgRQiIQXwsgFHADfgJVdFV+KS4ALTQrLh1XAGsCVCtqDlIhBDMEKhEwYXt4UxkFUQALPwIOLzs3RlRRU05pFmYrCyN1KwIGDjR4Y2VnGBBIeQtCBw4HISQqY3FCWUh2YhZYIApRBBcwPmpyWFtoLnwWVCI2LwFRCTNDdntVdHkVHBEoMFpYJlc3VkJjUE83Ty4xAAc=') };
 
+// ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
   localStorage.setItem('openaiKey', _KEYS.ai);
   initTheme();
+  initSearchCounter();
+  renderHistory();
 });
 
-// === THEME ===
+// ==================== THEME (dark mode) ====================
 function initTheme() {
-  const saved = localStorage.getItem('mealpicker-theme');
+  var saved = localStorage.getItem('mealpicker-theme');
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.setAttribute('data-theme', 'dark');
     updateThemeUI(true);
@@ -538,7 +1035,7 @@ function initTheme() {
 }
 
 document.getElementById('themeToggle').addEventListener('click', function() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   if (isDark) {
     document.documentElement.removeAttribute('data-theme');
     localStorage.setItem('mealpicker-theme', 'light');
@@ -555,47 +1052,129 @@ function updateThemeUI(isDark) {
   document.querySelector('.theme-label').textContent = isDark ? '라이트모드' : '다크모드';
 }
 
-// === SCROLL TOP ===
+// ==================== SCROLL TO TOP ====================
 window.addEventListener('scroll', function() {
   document.getElementById('scrollTopBtn').classList.toggle('visible', window.scrollY > 400);
 });
 
-// === EXAMPLES ===
+// ==================== SEARCH COUNTER ====================
+function initSearchCounter() {
+  var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10);
+  if (count > 0) {
+    document.getElementById('searchCount').textContent = count;
+    document.getElementById('searchCounter').classList.add('visible');
+  }
+}
+
+function incrementSearchCounter() {
+  var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10) + 1;
+  localStorage.setItem('mealpicker-search-count', count.toString());
+  document.getElementById('searchCount').textContent = count;
+  document.getElementById('searchCounter').classList.add('visible');
+}
+
+// ==================== SEARCH HISTORY ====================
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('mealpicker-history') || '[]'); } catch(e) { return []; }
+}
+
+function addHistory(query) {
+  var history = getHistory().filter(function(h) { return h !== query; });
+  history.unshift(query);
+  if (history.length > 8) history = history.slice(0, 8);
+  localStorage.setItem('mealpicker-history', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory() {
+  localStorage.removeItem('mealpicker-history');
+  renderHistory();
+}
+
+function renderHistory() {
+  var history = getHistory();
+  var section = document.getElementById('historySection');
+  var list = document.getElementById('historyList');
+
+  if (history.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = history.map(function(item) {
+    return '<span class="history-item" onclick="useHistory(this)" title="' + escapeHtml(item) + '">' + escapeHtml(item) + '</span>';
+  }).join('');
+}
+
+function useHistory(el) {
+  document.getElementById('userInput').value = el.title;
+  document.getElementById('userInput').focus();
+}
+
+// ==================== EXAMPLE CHIPS ====================
 function setExample(el) {
-  const text = el.textContent.replace(/^[^\s]+\s/, '');
+  var text = el.textContent.replace(/^[^\s]+\s/, '');
   document.getElementById('userInput').value = text;
   document.getElementById('userInput').focus();
 }
 
-// === COUPANG LINK ===
+// ==================== QUICK FILTER ====================
+function quickFilter(el, category) {
+  // visual active state
+  document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  el.classList.add('active');
+
+  var prompts = {
+    '한식': '한식 메뉴 추천해줘. 된장찌개, 불고기 같은 전통 한식 위주로',
+    '중식': '중식 메뉴 추천해줘. 짜장면, 마라탕 같은 중국 요리 위주로',
+    '양식': '양식 메뉴 추천해줘. 파스타, 스테이크 같은 서양 요리 위주로',
+    '일식': '일식 메뉴 추천해줘. 초밥, 라멘 같은 일본 요리 위주로',
+    '디저트': '디저트 메뉴 추천해줘. 케이크, 쿠키, 아이스크림 같은 간식 위주로',
+    '다이어트': '다이어트에 좋은 저칼로리 건강 메뉴 추천해줘'
+  };
+
+  document.getElementById('userInput').value = prompts[category] || (category + ' 메뉴 추천해줘');
+  getRecommendation();
+}
+
+// ==================== COUPANG LINK ====================
 function coupangLink(query) {
   return 'https://www.coupang.com/np/search?q=' + encodeURIComponent(query) + '&channel=user&src=1032001&spec=10305010&addtag=400&ctag=mealpicker&lptag=AF7220529';
 }
 
-// === CLEAN JSON ===
+// ==================== CLEAN JSON ====================
 function cleanJson(text) {
-  let s = text.trim();
-  // Remove markdown code block
+  var s = text.trim();
   s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
   s = s.trim();
-  // Try to extract JSON array
-  const arrMatch = s.match(/\[[\s\S]*\]/);
+  var arrMatch = s.match(/\[[\s\S]*\]/);
   if (arrMatch) s = arrMatch[0];
   return JSON.parse(s);
 }
 
-// === API CALL ===
+// ==================== FAQ ACCORDION ====================
+function toggleFaq(btn) {
+  var item = btn.parentElement;
+  var wasOpen = item.classList.contains('open');
+  // close all
+  document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('open'); });
+  // open this one if it was closed
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ==================== AI RECOMMENDATION ====================
 async function getRecommendation() {
-  const input = document.getElementById('userInput').value.trim();
+  var input = document.getElementById('userInput').value.trim();
   if (!input) {
     showError('상황이나 기분을 입력해주세요! 예: "비 오는 날 따뜻한 국물요리 추천해줘"');
     return;
   }
 
-  const btn = document.getElementById('suggestBtn');
-  const loading = document.getElementById('loadingArea');
-  const results = document.getElementById('resultsSection');
-  const errorEl = document.getElementById('errorMsg');
+  var btn = document.getElementById('suggestBtn');
+  var loading = document.getElementById('loadingArea');
+  var results = document.getElementById('resultsSection');
+  var errorEl = document.getElementById('errorMsg');
 
   btn.classList.add('loading');
   btn.disabled = true;
@@ -603,10 +1182,13 @@ async function getRecommendation() {
   results.classList.remove('active');
   errorEl.classList.remove('active');
 
-  const apiKey = localStorage.getItem('openaiKey');
+  // save to history
+  addHistory(input);
+
+  var apiKey = localStorage.getItem('openaiKey');
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    var res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -629,14 +1211,15 @@ async function getRecommendation() {
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
+      var errData = await res.json().catch(function() { return {}; });
       throw new Error(errData.error?.message || '요청에 실패했습니다. (HTTP ' + res.status + ')');
     }
 
-    const data = await res.json();
-    const content = data.choices[0].message.content;
-    const menus = cleanJson(content);
+    var data = await res.json();
+    var content = data.choices[0].message.content;
+    var menus = cleanJson(content);
 
+    incrementSearchCounter();
     renderMenus(menus);
   } catch (err) {
     showError('추천을 가져오는 중 오류가 발생했어요: ' + err.message);
@@ -644,32 +1227,40 @@ async function getRecommendation() {
     btn.classList.remove('loading');
     btn.disabled = false;
     loading.style.display = 'none';
+    // reset filter active state
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
   }
 }
 
 function showError(msg) {
-  const el = document.getElementById('errorMsg');
+  var el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.classList.add('active');
 }
 
-// === RENDER ===
+// ==================== RENDER MENUS ====================
 function renderMenus(menus) {
-  const grid = document.getElementById('menuGrid');
-  const section = document.getElementById('resultsSection');
+  var grid = document.getElementById('menuGrid');
+  var section = document.getElementById('resultsSection');
+  var title = document.getElementById('resultsTitle');
+
+  title.innerHTML = '🎯 AI 추천 메뉴 <span style="font-size:0.85rem;font-weight:400;color:var(--text-muted);">(' + menus.length + '개)</span>';
 
   grid.innerHTML = menus.map(function(item) {
-    const diffClass = item.difficulty === '쉬움' ? 'difficulty-easy' : '';
-    const ingredientTags = (item.ingredients || []).map(function(ing) {
-      return '<a class="ingredient-tag" href="' + coupangLink(ing) + '" target="_blank" rel="noopener" title="' + ing + ' 구매하기">' + ing + '</a>';
+    var diffClass = '';
+    if (item.difficulty === '쉬움') diffClass = 'difficulty-easy';
+    else if (item.difficulty === '어려움') diffClass = 'difficulty-hard';
+
+    var ingredientTags = (item.ingredients || []).map(function(ing) {
+      return '<a class="ingredient-tag" href="' + coupangLink(ing) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(ing) + ' 쿠팡에서 구매하기">' + escapeHtml(ing) + '</a>';
     }).join('');
 
-    return '<div class="menu-card">' +
+    return '<article class="menu-card">' +
       '<div class="card-header">' +
-        '<div class="card-emoji">' + (item.emoji || '🍽️') + '</div>' +
+        '<div class="card-emoji" aria-hidden="true">' + (item.emoji || '🍽️') + '</div>' +
         '<div class="card-title-wrap">' +
-          '<div class="card-title">' + escapeHtml(item.menu) + '</div>' +
-          '<div class="card-desc">' + escapeHtml(item.description) + '</div>' +
+          '<h3 class="card-title">' + escapeHtml(item.menu) + '</h3>' +
+          '<p class="card-desc">' + escapeHtml(item.description) + '</p>' +
         '</div>' +
       '</div>' +
       '<div class="card-badges">' +
@@ -678,11 +1269,11 @@ function renderMenus(menus) {
       '</div>' +
       '<div class="card-ingredients">' + ingredientTags + '</div>' +
       '<div class="card-actions">' +
-        '<a class="buy-btn" href="' + coupangLink(item.searchQuery) + '" target="_blank" rel="noopener">' +
+        '<a class="buy-btn" href="' + coupangLink(item.searchQuery || item.menu + ' 밀키트') + '" target="_blank" rel="noopener noreferrer">' +
           '🛒 밀키트 구매하기' +
         '</a>' +
       '</div>' +
-    '</div>';
+    '</article>';
   }).join('');
 
   section.classList.add('active');
@@ -696,7 +1287,7 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// Enter key
+// ==================== ENTER KEY ====================
 document.getElementById('userInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
