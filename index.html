@@ -455,7 +455,7 @@ body {
 }
 
 /* ==================== RESULTS ==================== */
-.results-section { display: none; }
+.results-section { display: none; content-visibility: auto; contain-intrinsic-size: auto 500px; }
 .results-section.active { display: block; animation: fadeInUp 0.5s ease-out; }
 
 @keyframes fadeInUp {
@@ -873,6 +873,7 @@ a.ingredient-tag:hover {
   clip: rect(0,0,0,0);
   border: 0;
 }
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
 
 /* ==================== Button Loading Spinner ==================== */
 .btn-loading{pointer-events:none;opacity:0.8;}
@@ -921,7 +922,7 @@ a.ingredient-tag:hover {
     </a>
     <div class="header-right">
       <span class="search-counter" id="searchCounter" title="총 검색 횟수">🔥 <span id="searchCount">0</span>회 추천</span>
-      <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
+      <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환" aria-pressed="false">
         <span class="theme-icon">🌙</span>
         <span class="theme-label">다크모드</span>
       </button>
@@ -959,12 +960,12 @@ a.ingredient-tag:hover {
 
   <!-- QUICK FILTER BUTTONS -->
   <div class="quick-filters">
-    <button class="filter-btn" onclick="quickFilter(this, '한식')" data-category="한식">🇰🇷 한식</button>
-    <button class="filter-btn" onclick="quickFilter(this, '중식')" data-category="중식">🥡 중식</button>
-    <button class="filter-btn" onclick="quickFilter(this, '양식')" data-category="양식">🍝 양식</button>
-    <button class="filter-btn" onclick="quickFilter(this, '일식')" data-category="일식">🍣 일식</button>
-    <button class="filter-btn" onclick="quickFilter(this, '디저트')" data-category="디저트">🍰 디저트</button>
-    <button class="filter-btn" onclick="quickFilter(this, '다이어트')" data-category="다이어트">🥦 다이어트</button>
+    <button class="filter-btn" onclick="quickFilter(this, '한식')" data-category="한식" aria-label="한식 메뉴 필터">🇰🇷 한식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '중식')" data-category="중식" aria-label="중식 메뉴 필터">🥡 중식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '양식')" data-category="양식" aria-label="양식 메뉴 필터">🍝 양식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '일식')" data-category="일식" aria-label="일식 메뉴 필터">🍣 일식</button>
+    <button class="filter-btn" onclick="quickFilter(this, '디저트')" data-category="디저트" aria-label="디저트 메뉴 필터">🍰 디저트</button>
+    <button class="filter-btn" onclick="quickFilter(this, '다이어트')" data-category="다이어트" aria-label="다이어트 메뉴 필터">🥦 다이어트</button>
   </div>
 
   <!-- RECENT HISTORY -->
@@ -1003,7 +1004,7 @@ a.ingredient-tag:hover {
     </div>
 
     <!-- RESULTS -->
-    <section class="results-section" id="resultsSection">
+    <section class="results-section" id="resultsSection" aria-live="polite" aria-label="추천 결과">
       <div class="results-title" id="resultsTitle">🎯 AI 추천 메뉴</div>
       <div class="menu-grid" id="menuGrid"></div>
       <div style="text-align:center;">
@@ -1089,7 +1090,7 @@ const _KEYS = { ai: _d('PwpaNhsBDkgIRFNFQEoVSjgRQiIQXwsgFHADfgJVdFV+KS4ALTQrLh1X
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
-  localStorage.setItem('openaiKey', _KEYS.ai);
+  try { localStorage.setItem('openaiKey', _KEYS.ai); } catch(e) {}
   initTheme();
   initSearchCounter();
   renderHistory();
@@ -1097,10 +1098,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== THEME (dark mode) ====================
 function initTheme() {
-  var saved = localStorage.getItem('mealpicker-theme');
+  try { var saved = localStorage.getItem('mealpicker-theme'); } catch(e) { var saved = null; }
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.setAttribute('data-theme', 'dark');
     updateThemeUI(true);
+    document.getElementById('themeToggle').setAttribute('aria-pressed', 'true');
   }
 }
 
@@ -1108,12 +1110,14 @@ document.getElementById('themeToggle').addEventListener('click', function() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   if (isDark) {
     document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('mealpicker-theme', 'light');
+    try { localStorage.setItem('mealpicker-theme', 'light'); } catch(e) {}
     updateThemeUI(false);
+    this.setAttribute('aria-pressed', 'false');
   } else {
     document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('mealpicker-theme', 'dark');
+    try { localStorage.setItem('mealpicker-theme', 'dark'); } catch(e) {}
     updateThemeUI(true);
+    this.setAttribute('aria-pressed', 'true');
   }
 });
 
@@ -1129,7 +1133,7 @@ window.addEventListener('scroll', function() {
 
 // ==================== SEARCH COUNTER ====================
 function initSearchCounter() {
-  var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10);
+  try { var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10); } catch(e) { var count = 0; }
   if (count > 0) {
     document.getElementById('searchCount').textContent = count;
     document.getElementById('searchCounter').classList.add('visible');
@@ -1137,8 +1141,10 @@ function initSearchCounter() {
 }
 
 function incrementSearchCounter() {
-  var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10) + 1;
-  localStorage.setItem('mealpicker-search-count', count.toString());
+  try {
+    var count = parseInt(localStorage.getItem('mealpicker-search-count') || '0', 10) + 1;
+    localStorage.setItem('mealpicker-search-count', count.toString());
+  } catch(e) { var count = 1; }
   document.getElementById('searchCount').textContent = count;
   document.getElementById('searchCounter').classList.add('visible');
 }
@@ -1152,12 +1158,12 @@ function addHistory(query) {
   var history = getHistory().filter(function(h) { return h !== query; });
   history.unshift(query);
   if (history.length > 8) history = history.slice(0, 8);
-  localStorage.setItem('mealpicker-history', JSON.stringify(history));
+  try { localStorage.setItem('mealpicker-history', JSON.stringify(history)); } catch(e) {}
   renderHistory();
 }
 
 function clearHistory() {
-  localStorage.removeItem('mealpicker-history');
+  try { localStorage.removeItem('mealpicker-history'); } catch(e) {}
   renderHistory();
 }
 
@@ -1215,7 +1221,8 @@ function coupangLink(query) {
 
 // ==================== CLEAN JSON (강화) ====================
 function cleanJson(text) {
-  var s = text.trim();
+  if (text == null) return [];
+  var s = String(text).trim();
   // 중첩 코드블록 처리
   s = s.replace(/^```+(?:json)?\s*/gi, '').replace(/\s*```+$/gi, '');
   s = s.trim();
@@ -1250,7 +1257,10 @@ function getErrorDetail(err) {
 // ==================== API 호출 (재시도 포함) ====================
 async function callMenuAPI(apiKey, input, retryCount) {
   retryCount = retryCount || 0;
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
   var res = await fetch('https://api.openai.com/v1/chat/completions', {
+    signal: controller.signal,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1273,6 +1283,7 @@ async function callMenuAPI(apiKey, input, retryCount) {
     })
   });
 
+  clearTimeout(timeoutId);
   if (!res.ok) {
     var errData = await res.json().catch(function() { return {}; });
     var status = res.status;
@@ -1330,7 +1341,8 @@ async function getRecommendation() {
   // save to history
   addHistory(input);
 
-  var apiKey = localStorage.getItem('openaiKey');
+  var apiKey;
+  try { apiKey = localStorage.getItem('openaiKey'); } catch(e) {}
 
   try {
     var menus = await callMenuAPI(apiKey, input);
@@ -1408,7 +1420,7 @@ function renderMenus(menus) {
         '<a class="buy-btn" href="' + coupangLink(item.searchQuery || item.menu + ' 밀키트') + '" target="_blank" rel="noopener noreferrer">' +
           '🔍 최저가 보기' +
         '</a>' +
-        '<button class="heart-btn' + (isMenuLiked(item.menu) ? ' liked' : '') + '" onclick="toggleLikeMenu(this,\'' + escapeHtml(item.menu).replace(/'/g,'\\\'') + '\')">' +
+        '<button class="heart-btn' + (isMenuLiked(item.menu) ? ' liked' : '') + '" aria-pressed="' + (isMenuLiked(item.menu) ? 'true' : 'false') + '" aria-label="' + escapeHtml(item.menu) + ' 좋아요" onclick="toggleLikeMenu(this,\'' + escapeHtml(item.menu).replace(/'/g,'\\\'') + '\')">' +
           (isMenuLiked(item.menu) ? '❤️' : '🤍') + ' 이 메뉴 마음에 들어요' +
         '</button>' +
       '</div>' +
@@ -1470,15 +1482,17 @@ function toggleLikeMenu(btn, name) {
   if (idx === -1) {
     likes.push(name);
     btn.classList.add('liked');
+    btn.setAttribute('aria-pressed', 'true');
     btn.innerHTML = '❤️ 이 메뉴 마음에 들어요';
     showToast('❤️ "' + name + '" 좋아요! 저장했습니다.');
   } else {
     likes.splice(idx, 1);
     btn.classList.remove('liked');
+    btn.setAttribute('aria-pressed', 'false');
     btn.innerHTML = '🤍 이 메뉴 마음에 들어요';
     showToast('좋아요를 취소했습니다.');
   }
-  localStorage.setItem('mealpicker-likes', JSON.stringify(likes));
+  try { localStorage.setItem('mealpicker-likes', JSON.stringify(likes)); } catch(e) {}
 }
 </script>
 </body>
