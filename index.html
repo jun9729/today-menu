@@ -928,20 +928,11 @@ a.ingredient-tag:hover {
       <div class="results-title" id="resultsTitle">🎯 AI 추천 메뉴</div>
       <div class="menu-grid" id="menuGrid"></div>
 
-      <!-- MID AD -->
-      <div class="mid-ad">
-        <div class="ad-label">AD</div>
-        <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" style="max-width:728px;margin:0 auto;display:block;" title="쿠팡 파트너스 광고"></iframe>
-      </div>
     </section>
   </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" aria-label="광고">
-    <div class="sidebar-ad">
-      <div class="sidebar-ad-label">AD</div>
-      <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" title="쿠팡 파트너스 광고"></iframe>
-    </div>
     <div class="sidebar-ad">
       <div class="sidebar-ad-label">AD</div>
       <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker_side&width=260&height=240" width="260" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" title="쿠팡 파트너스 광고"></iframe>
@@ -998,13 +989,11 @@ a.ingredient-tag:hover {
 <footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-logo">🍽️ MealPicker — AI 메뉴 추천</div>
-    <p class="footer-desc">
-      이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-    </p>
     <p class="footer-notice">&copy; 2026 MealPicker. AI 기반 메뉴 추천 서비스.</p>
     <div class="footer-bottom-ad">
       <iframe src="https://ads-partners.coupang.com/widgets.html?id=862498&template=carousel&trackingCode=AF7220529&subId=mealpicker&width=680&height=70" width="100%" height="70" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" loading="lazy" style="max-width:728px;margin:0 auto;display:block;" title="쿠팡 파트너스 광고"></iframe>
     </div>
+    <p style="font-size:0.65rem;color:var(--text-muted);margin-top:12px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
   </div>
 </footer>
 
@@ -1200,7 +1189,7 @@ async function getRecommendation() {
         messages: [
           {
             role: 'system',
-            content: '당신은 메뉴 추천 전문가입니다. 사용자의 상황, 기분, 날씨에 맞는 메뉴를 5~6개 추천해주세요. 반드시 아래 JSON 배열 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요.\n[{"menu":"메뉴명","description":"한줄설명","emoji":"이모지","difficulty":"쉬움/보통/어려움","time":"조리시간","ingredients":["재료1","재료2"],"searchQuery":"쿠팡 밀키트 검색어"}]'
+            content: '당신은 메뉴 추천 전문가이자 영양 전문가입니다. 사용자의 상황, 기분, 날씨, 건강 상태를 종합적으로 분석하여 8~10개의 메뉴를 추천해주세요. 각 메뉴에 대해 예상 칼로리, 난이도, 조리시간, 주요 재료를 상세히 제공하세요. 설명은 맛의 특징과 추천 이유를 구체적으로 2문장 이상 작성하세요. 반드시 아래 JSON 배열 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요.\n[{"menu":"메뉴명","description":"맛 특징과 추천 이유 2문장 이상","emoji":"이모지","difficulty":"쉬움/보통/어려움","time":"조리시간","calories":"예상 칼로리(예: 약 450kcal)","ingredients":["재료1","재료2","재료3"],"searchQuery":"쿠팡 밀키트 검색어"}]'
           },
           {
             role: 'user',
@@ -1252,7 +1241,7 @@ function renderMenus(menus) {
     else if (item.difficulty === '어려움') diffClass = 'difficulty-hard';
 
     var ingredientTags = (item.ingredients || []).map(function(ing) {
-      return '<a class="ingredient-tag" href="' + coupangLink(ing) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(ing) + ' 쿠팡에서 구매하기">' + escapeHtml(ing) + '</a>';
+      return '<span class="ingredient-tag" style="cursor:default;">' + escapeHtml(ing) + '</span>';
     }).join('');
 
     return '<article class="menu-card">' +
@@ -1266,11 +1255,12 @@ function renderMenus(menus) {
       '<div class="card-badges">' +
         '<span class="badge ' + diffClass + '">📊 ' + escapeHtml(item.difficulty) + '</span>' +
         '<span class="badge">⏱️ ' + escapeHtml(item.time) + '</span>' +
+        (item.calories ? '<span class="badge" style="background:#fef3c7;color:#92400e;border-color:#fde68a;">🔥 ' + escapeHtml(item.calories) + '</span>' : '') +
       '</div>' +
       '<div class="card-ingredients">' + ingredientTags + '</div>' +
       '<div class="card-actions">' +
         '<a class="buy-btn" href="' + coupangLink(item.searchQuery || item.menu + ' 밀키트') + '" target="_blank" rel="noopener noreferrer">' +
-          '🛒 밀키트 구매하기' +
+          '🔍 최저가 보기' +
         '</a>' +
       '</div>' +
     '</article>';
